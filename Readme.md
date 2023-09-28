@@ -90,7 +90,7 @@ type.name=github
 ## Running the Connector
 
 ```
-<path-to-kafka>/bin/connect-standalone standalone.properties sonarqube.properties elasticsearch.properties
+<path-to-kafka>/bin/connect-standalone standalone.properties github.properties elasticsearch.properties
 ```
 
 ## Built With
