@@ -1,8 +1,8 @@
-# Q-Rapids Kafka Connector for Sonarqube ![](https://img.shields.io/badge/License-Apache2.0-blue.svg)
+# Q-Rapids Kafka Connector for Google Sheets ![](https://img.shields.io/badge/License-Apache2.0-blue.svg)
 
-An Apache Kafka Connector that collects Issues and Measures from Sonarqube.
+An Apache Kafka Connector that collects Imputations from Google Sheets.
 
-This component has been created as a result of the Q-Rapids project funded by the European Union Horizon 2020 Research and Innovation programme under grant agreement No 732253.
+More specifically, this connector is designed to retrieve individual hour imputations from a Project Record Track, hosted in a Google Sheets file.
 
 ## Running the Connector
 
@@ -19,14 +19,13 @@ After build, you'll find the generated jar in the target folder
 
 ### Configuration files
 
-Example Configuration for kafka standalone connector (standalone.properties)
+Example Configuration for Kafka Standalone Connector (standalone.properties)
 
 ```properties 
 bootstrap.servers=<kafka-ip>:9092
 
 key.converter=org.apache.kafka.connect.storage.StringConverter
 value.converter=org.apache.kafka.connect.json.JsonConverter
-
 key.converter.schemas.enable=true
 value.converter.schemas.enable=true
 
@@ -35,140 +34,70 @@ internal.value.converter=org.apache.kafka.connect.json.JsonConverter
 internal.key.converter.schemas.enable=false
 internal.value.converter.schemas.enable=false
 
-offset.storage.file.filename=/tmp/connect-sonarqube.offsets
-
-offset.flush.interval.ms=1000
-rest.port=8088
+offset.storage.file.filename=/tmp/connect.offsets
+offset.flush.interval.ms=60000
+offset.flush.timeout.ms=10000
+rest.port=8189
 ```
-#### Sonarqube Configuration
-Configuration for Sonarqube Source Connector Worker (sonarqube.properties)
+
+#### Google Sheets Configuration
+
+Configuration for Google Sheets Source Connector Worker (sheets.properties)
 
 ```properties
-name=kafka-sonar-source-connector
-connector.class=connect.sonarqube.SonarqubeSourceConnector
+name=kafka-sheet-source-connector
+connector.class=connect.sheets.googlesheets.SheetsSourceConnector
 tasks.max=1
 
-# sonarqube server url
-sonar.url=http://<your-sonarqube-address>:9000
+## Common fields
 
-#authenticate, user need right to Execute Analysis
-sonar.user=<sonaruser>
-sonar.pass=<sonarpass>
+account.type=<accountType>
+project.id=<projectID>
+private.key.id=<privateKeyID>
+private.key=<privateKey>
+client.email=<clientEmail>
+client.id=<clientID>
+auth.uri=<authenticationURI>
+token.uri=<tokenURI>
+auth.provider.x509.cert.url=<authCertificateProvider>
+client.x509.cert.url=<clientCertificateURL>
 
-# key for measure collection
-sonar.basecomponent.key=<key of application under analysis>
+sprint.names=<sprintNames>
 
-#projectKeys for issue collection
-sonar.project.key=<key of application under analysis>
+sheets.interval.seconds=86400
+sheets.teams.num=<numberOfTeams>
+sheets.teams.interval.seconds=120
 
-# kafka topic names
-sonar.measure.topic=sonar.metrics
-sonar.issue.topic=sonar.issues
+## Particular fields (until tasks.<numberOfTeams> - 1)
 
-# measures to collect, since sonarqube6 max 15 metrics
-# see https://docs.sonarqube.org/latest/user-guide/metric-definitions/
-sonar.metric.keys=ncloc,lines,comment_lines,complexity,violations,open_issues,code_smells,new_code_smells,sqale_index,new_technical_debt,bugs,new_bugs,reliability_rating,classes,functions
+tasks.0.spreadsheet.id=<spreadsheetID>
+tasks.0.team.name=<teamName>
+tasks.0.imputations.topic=sheets_0.imputations
 
-#poll interval (86400 secs = 24 h)
-sonar.interval.seconds=86400
+tasks.1.spreadsheet.id=<spreadsheetID>
+tasks.1.team.name=<teamName>
+tasks.1.imputations.topic=sheets_1.imputations
 
-#set snapshotDate manually, format: YYYY-MM-DD
-sonar.snapshotDate=
+...
 ```
 
 Configuration for Elasticsearch Sink Connector Worker (elasticsearch.properties)
 
 ```properties
-name=kafka-sonarqube-elasticsearch
+name=kafka-sheets-elasticsearch
 connector.class=io.confluent.connect.elasticsearch.ElasticsearchSinkConnector
 tasks.max=1
-topics=sonarqube.measures,sonarqube.issues
-key.ignore=true
-connection.url=http://<elasticsearch>:9200
-type.name=sonarqube
-
+topics=sheets_0.imputations, sheets_1.imputations, \
+    ...
+key.ignore=false
+connection.url=http://elasticsearch:9200
+type.name=sheets
 ```
-
-#### Mantis Configuration
-Configuration for Sonarqube Source Connector Worker (sonarqube.properties)
-
-```properties
-name=kafka-mantis-source-connector
-connector.class=connect.mantis.MantisSourceConnector
-tasks.max=1
-
-# Mantis Data Base Url
-mantis.url=jdbc:mysql://<your-mantis-address>:3307/mantis
-
-# Mantis Data Base Credidential
-mantis.user=
-mantis.pass=
-
-# Monitored Project
-mantis.project=Modelio
-
-# kafka topic names
-topic.newissue=mantis.issues
-topic.updatedissue=mantis.update
-topic.stat=mantis.stat
-
-#poll interval (86400 secs = 24 h)
-poll.interval.seconds=86400
-
-```
-
-Configuration for Elasticsearch Sink Connector Worker (elasticsearch.properties)
-
-```properties
-name=kafka-elasticsearch-mantis
-connector.class=io.confluent.connect.elasticsearch.ElasticsearchSinkConnector
-tasks.max=1
-topics=mantis.issues,mantis.update,mantis.stat
-key.ignore=true
-connection.url=http://<elasticsearch>:9200
-type.name=mantis
-```
-
-#### OpenProject Configuration
-Configuration for Sonarqube Source Connector Worker (sonarqube.properties)
-
-```properties
-name=kafka-openproject-ModelioNG-source-connector
-connector.class=connect.openproject.OpenProjectSourceConnector
-tasks.max=1
-# OpenProject Server Url
-openproject.url=http://<your-openproject-address>/openproject
-# OpenProject Api Key
-openproject.apikey=
-#Name of the monitored Project
-openproject.project=
-# kafka topic names
-openproject.topic=openproject
-openproject.stat.topic=openproject.stat
-#poll interval (86400 secs = 24 h)
-poll.interval.seconds=86400
-
-```
-
-Configuration for Elasticsearch Sink Connector Worker (elasticsearch.properties)
-
-```properties
-name=kafka-openproject-elasticsearch
-connector.class=io.confluent.connect.elasticsearch.ElasticsearchSinkConnector
-tasks.max=1
-topics=openproject,openproject.stat
-key.ignore=true
-connection.url=http://<elasticsearch>:9200
-type.name=openproject
-```
-
-End with an example of getting some data out of the system or using it for a little demo
-
 
 ## Running the Connector
 
 ```
-<path-to-kafka>/bin/connect-standalone standalone.properties sonarqube.properties elasticsearch.properties
+<path-to-kafka>/bin/connect-standalone standalone.properties sheets.properties elasticsearch.properties
 ```
 
 ## Built With
@@ -179,4 +108,5 @@ End with an example of getting some data out of the system or using it for a lit
 ## Authors
 
 * **Axel Wickenkamp, Fraunhofer IESE**
+* **Laura Cazorla, UPC - FIB**
 
