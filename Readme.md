@@ -76,7 +76,7 @@ tasks.1.taiga.task.topic=taiga_1.tasks
 Configuration for Elasticsearch Sink Connector Worker (elasticsearch.properties)
 
 ```properties
-name=kafka-github-asw-elasticsearch
+name=kafka-github-elasticsearch
 connector.class=io.confluent.connect.elasticsearch.ElasticsearchSinkConnector
 tasks.max=1
 topics=github_0.commits, github_0.issues, \
