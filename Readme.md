@@ -60,12 +60,12 @@ github.teams.interval.seconds=120
 
 ## Particular fields (until tasks.<numberOfTeams> - 1)
 
-tasks.0.github.url=https://api.github.com/orgs/<githubOrgName>
+tasks.0.github.url=<githubOrgName>
 tasks.0.github.commit.topic=github_0.commits
 tasks.0.github.issue.topic=github_0.issues
 tasks.0.taiga.task.topic=taiga_0.tasks
 
-tasks.1.github.url=https://api.github.com/orgs/<githubOrgName>
+tasks.1.github.url=<githubOrgName>
 tasks.1.github.commit.topic=github_1.commits
 tasks.1.github.issue.topic=github_1.issues
 tasks.1.taiga.task.topic=taiga_1.tasks

@@ -279,7 +279,7 @@ public class GithubSourceTask extends SourceTask {
 			firstPoll.remove(currentTaskID);
 			firstPoll.add(currentTaskID, false);
 			log.info("Finished executing task " + currentTaskID + " with Github organization " + githubOrgUrl.get(currentTaskID));
-			log.info("**********\n\n\n");
+			log.info("**********\n\n");
 
 			++currentTaskID;
 			if (currentTaskID == teamsNum) currentTaskID = 0;
@@ -536,7 +536,7 @@ public class GithubSourceTask extends SourceTask {
 		}
 
 		for (int i = 0; i < githubOrgUrl.size(); ++i) {
-			log.info("Organization URL: " + githubOrgUrl.get(i));
+			log.info("Organization name: " + githubOrgUrl.get(i));
 			String[] reposUrl = githubUrls.get(i);
 			for (String s : reposUrl) log.info("\tRepository URL: " + s);
 		}
