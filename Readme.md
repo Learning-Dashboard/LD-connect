@@ -97,7 +97,7 @@ type.name=taiga
 ## Running the Connector
 
 ```
-<path-to-kafka>/bin/connect-standalone standalone.properties sonarqube.properties elasticsearch.properties
+<path-to-kafka>/bin/connect-standalone standalone.properties taiga.properties elasticsearch.properties
 ```
 
 ## Built With
