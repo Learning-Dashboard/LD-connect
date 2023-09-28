@@ -44,7 +44,7 @@ rest.port=8189
 Configuration for Taiga Source Connector Worker (taiga.properties)
 
 ```properties
-name=kafka-taiga-asw-source-connector
+name=kafka-taiga-source-connector
 connector.class=connect.taiga.TaigaSourceConnector
 tasks.max=1
 
@@ -81,7 +81,7 @@ tasks.1.taiga.task.topic=taiga_1.tasks
 Configuration for Elasticsearch Sink Connector Worker (elasticsearch.properties)
 
 ```properties
-name=kafka-taiga-asw-elasticsearch
+name=kafka-taiga-elasticsearch
 connector.class=io.confluent.connect.elasticsearch.ElasticsearchSinkConnector
 tasks.max=1
 topics=taiga_0.issues, taiga_0.epics, \
