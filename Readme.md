@@ -24,7 +24,6 @@ bootstrap.servers=<kafka-ip>:9092
 
 key.converter=org.apache.kafka.connect.storage.StringConverter
 value.converter=org.apache.kafka.connect.json.JsonConverter
-
 key.converter.schemas.enable=true
 value.converter.schemas.enable=true
 
@@ -34,9 +33,9 @@ internal.key.converter.schemas.enable=false
 internal.value.converter.schemas.enable=false
 
 offset.storage.file.filename=/tmp/connect.offsets
-
-offset.flush.interval.ms=1000
-rest.port=8088
+offset.flush.interval.ms=60000
+offset.flush.timeout.ms=10000
+rest.port=8189
 ```
 
 #### Github Configuration
@@ -59,7 +58,7 @@ github.interval.seconds=86400
 github.teams.num=<numberOfTeams>
 github.teams.interval.seconds=120
 
-## Particular fields (until tasks.<numberOfTeams - 1>)
+## Particular fields (until tasks.<numberOfTeams> - 1)
 
 tasks.0.github.url=https://api.github.com/orgs/<githubOrgName>
 tasks.0.github.commit.topic=github_0.commits
@@ -72,7 +71,6 @@ tasks.1.github.issue.topic=github_1.issues
 tasks.1.taiga.task.topic=taiga_1.tasks
 
 ...
-
 ```
 
 Configuration for Elasticsearch Sink Connector Worker (elasticsearch.properties)
@@ -98,7 +96,6 @@ type.name=github
 ## Built With
 
 * [Maven](https://maven.apache.org/) - Dependency Management
-
 
 ## Authors
 
