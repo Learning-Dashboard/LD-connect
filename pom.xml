@@ -3,9 +3,9 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.fhg.iese</groupId>
 	<artifactId>qrapids-connect-sheets</artifactId>
-	<version>mongoTest</version>
+	<version>3.1</version>
 	<name>Q-Rapids Kafka connectors</name>
-	<description>Connectors for jenkins, jira, sonarcube, svn, and redmine</description>
+	<description>Connector for Google Sheets</description>
 
 	<repositories>
 		<repository>
@@ -73,24 +73,6 @@
 			<groupId>org.tmatesoft.svnkit</groupId>
 			<artifactId>svnkit</artifactId>
 			<version>1.8.14</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.elasticsearch.client</groupId>
-			<artifactId>transport</artifactId>
-			<version>5.6.3</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.elasticsearch.client</groupId>
-			<artifactId>elasticsearch-rest-high-level-client</artifactId>
-			<version>5.6.3</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.elasticsearch.client</groupId>
-			<artifactId>elasticsearch-rest-client</artifactId>
-			<version>5.6.3</version>
 		</dependency>
 
 		<dependency>
