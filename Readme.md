@@ -8,8 +8,8 @@ More specifically, this connector is designed to retrieve individual hour imputa
 
 ### Prerequisites
 
-* Kafka has to be setup and running (see [Kafka Connect](https://docs.confluent.io/current/connect/index.html))
-* If you want your data to be transfered to Elasticsearch, Elasticsearch has to be setup and running. (see [Set up Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/setup.html))
+* Kafka has to be setup and running (see [Kafka Connect](https://docs.confluent.io/current/connect/index.html)).
+* If you want your data to be transfered to MongoDB, MongoDB has to be setup and running (see [Set up MongoDB](https://www.mongodb.com/docs/manual/tutorial/getting-started/)).
 
 ### Build the connector
 ```
@@ -81,10 +81,10 @@ tasks.1.imputations.topic=sheets_1.imputations
 ...
 ```
 
-Configuration for Elasticsearch Sink Connector Worker (mongo.properties)
+Configuration for MongoDB Sink Connector Worker (mongo.properties)
 
 ```properties
-name=kafka-sheets-elasticsearch
+name=kafka-sheets-mongodb
 connector.class=com.mongodb.kafka.connect.MongoSinkConnector
 tasks.max=1
 topics=sheets_0.imputations, sheets_1.imputations, \
