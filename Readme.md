@@ -9,7 +9,7 @@ More specifically, this connector is designed to retrieve individual hour imputa
 ### Prerequisites
 
 * Kafka has to be setup and running (see [Kafka Connect](https://docs.confluent.io/current/connect/index.html)).
-* If you want your data to be transfered to MongoDB, MongoDB has to be setup and running (see [Set up MongoDB](https://www.mongodb.com/docs/manual/tutorial/getting-started/)).
+* If you want your data to be transferred to MongoDB, MongoDB has to be setup and running (see [Set up MongoDB](https://www.mongodb.com/docs/manual/tutorial/getting-started/)).
 
 ### Build the connector
 ```
@@ -45,7 +45,7 @@ rest.port=8189
 Configuration for Google Sheets Source Connector Worker (sheets.properties)
 
 ```properties
-name=kafka-sheet-source-connector
+name=kafka-sheets-source-connector
 connector.class=connect.sheets.googlesheets.SheetsSourceConnector
 tasks.max=1
 
