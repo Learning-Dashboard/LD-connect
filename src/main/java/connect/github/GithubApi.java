@@ -188,9 +188,9 @@ public class GithubApi {
 		return gson.fromJson(json, CommitStats.class);
 	}
 
-	public static Repository[] getReposFromOrganization(String url, String secret) {
-		String api = "/repos";
-		String urlCall = url + api;
+	public static Repository[] getReposFromOrganization(String orgName, String secret) {
+		String api = "https://api.github.com/orgs/";
+		String urlCall = api + orgName + "/repos";
 		RESTInvoker ri = new RESTInvoker(urlCall, secret);
 		String json = ri.getDataFromServer("");
 		return gson.fromJson(json, Repository[].class);
