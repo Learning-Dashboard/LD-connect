@@ -1,5 +1,6 @@
 package connect.openproject;
 
+import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -10,6 +11,8 @@ import com.google.gson.Gson;
 import model.openproject.OPResult;
 import model.openproject.OPWorkPackage;
 import rest.RESTInvoker;
+
+import org.apache.http.client.utils.URIBuilder;
 
 public class OpenProjectAPI {
 
@@ -22,37 +25,55 @@ public class OpenProjectAPI {
 	}
 	
 	public static OPResult getProjects(String openPeojectUrl, String username, String password) {		
-		RESTInvoker ri = new RESTInvoker(openPeojectUrl + "/api/v3/projects" , username, password);	
-		Gson  gson = new Gson();	
-		String json = ri.getDataFromServer("");
+		String json = null;
+		Gson gson = new Gson();	
+		try {
+			URIBuilder uriBuilder = new URIBuilder(openPeojectUrl + "/api/v3/projects");
+			RESTInvoker ri = new RESTInvoker(uriBuilder.toString(), username, password);	
+			json = ri.getDataFromServer("");
+		} catch (URISyntaxException e) {
+			throw new RuntimeException("Error building URI at getProjects from OpenProjectAPI from openproject.", e);
+		}
 		return gson.fromJson(json, OPResult.class);
 	}
 	
 	
 	public static OPResult getWorkPackageByProject(String openPeojectUrl,int projectId, String username, String password, Date lastExecution) {		
 		
-		RESTInvoker ri = null;
-		if(lastExecution != null) {
-			String fromDate= dfZULU.format(lastExecution);
-			String toDate= dfZULU.format(new Date());
-			ri = new RESTInvoker(openPeojectUrl + "/api/v3/projects/"+projectId+"/work_packages/?filters=[{\"updatedAt\":{\"operator\":\"<>d\",\"values\":[\""+fromDate+"\",\""+toDate+"\"]}}]&pageSize=500", username, password);	
-
-		}else {
-			ri = new RESTInvoker(openPeojectUrl + "/api/v3/projects/"+projectId+"/work_packages/?filters=[]&pageSize=500", username, password);	
+		Gson gson = new Gson();
+		String json; 
+		try {
+			URIBuilder uriBuilder = new URIBuilder(openPeojectUrl + "/api/v3/projects/" + projectId + "/work_packages/");
+			if (lastExecution != null) {
+				String fromDate = dfZULU.format(lastExecution);
+				String toDate = dfZULU.format(new Date());
+				String filters = "[{\"updatedAt\":{\"operator\":\"<>d\",\"values\":[\"" + fromDate + "\",\"" + toDate + "\"]}}]";
+				uriBuilder.addParameter("filters", filters);
+			} else {
+				uriBuilder.addParameter("filters", "[]");
+			}
+			uriBuilder.addParameter("pageSize", "500");
+			
+			RESTInvoker ri = new RESTInvoker(uriBuilder.toString(), username, password);
+			json = ri.getDataFromServer("");
+		} catch (URISyntaxException e) {
+			throw new RuntimeException("Error building URI at getWorkPackageByProject from OpenProjectAPI from openproject.", e);
 		}
-		
-		Gson  gson = new Gson();	
-		String json = ri.getDataFromServer("");
 		return gson.fromJson(json, OPResult.class);
 	}
 	
 	
 	
 	public static OPWorkPackage getWorkPackage(String openPeojectUrl,int workPackageId, String username, String password) {		
-		RESTInvoker ri = new RESTInvoker(openPeojectUrl + "/api/v3/work_packages/"+workPackageId , username, password);	
+		String json = null;
+		try {
+			URIBuilder uriBuilder = new URIBuilder(openPeojectUrl + "/api/v3/work_packages/" + workPackageId);
+			RESTInvoker ri = new RESTInvoker(uriBuilder.toString(), username, password);
+			json = ri.getDataFromServer("");
+		} catch (URISyntaxException e) {
+			throw new RuntimeException("Error building URI at getWorkPackage from OpenProjectAPI from openproject.", e);
+		}
 		Gson  gson = new Gson();	
-		String json = ri.getDataFromServer("");
-		System.out.println(json);
 		return gson.fromJson(json, OPWorkPackage.class);
 	}
 }

@@ -2,6 +2,10 @@
 
 An Apache Kafka Connector that collects Issues and Commits from Github.
 
+## There is a connector for every source at different stale branches
+
+You must choose between git-connector, taiga-connector and google-sheets-connector. 
+
 ## Running the Connector
 
 ### Prerequisites

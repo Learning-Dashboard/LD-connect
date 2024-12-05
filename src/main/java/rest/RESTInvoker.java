@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.AccessDeniedException;
@@ -53,6 +54,7 @@ public class RESTInvoker {
         StringBuilder sb = new StringBuilder();
         int code = 0;
         try {
+
             URL url = new URL(baseUrl + path);
 
             HttpURLConnection urlConnection = (HttpURLConnection) setUsernamePassword(url);
