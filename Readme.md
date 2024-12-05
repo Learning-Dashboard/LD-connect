@@ -4,6 +4,10 @@ An Apache Kafka Connector that collects Issues and Measures from Sonarqube.
 
 This component has been created as a result of the Q-Rapids project funded by the European Union Horizon 2020 Research and Innovation programme under grant agreement No 732253.
 
+## There is a connector for every source at different stale branches
+
+You must choose between git-connector, taiga-connector and google-sheets-connector. 
+
 ## Running the Connector
 
 ### Prerequisites
