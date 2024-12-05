@@ -36,6 +36,8 @@ import model.jenkins.BuildWithDetails;
 import model.jenkins.Parameter;
 import rest.RESTInvoker;
 
+import org.apache.http.client.utils.URIBuilder;
+
 
 /**
  * Kafka SVN Connector Source Task
@@ -202,8 +204,15 @@ public class JenkinsSourceTask extends SourceTask {
 				log.info("-------------------------------- found build " + b.getNumber());
 				
 				// RESTInvoker ri = new RESTInvoker(serverURI + "/job/build_ongoing_compile/" + b.getNumber() + "/api/json", user , pass);
-				RESTInvoker ri = new RESTInvoker(serverURI + "/job/" + jwd.getName() + "/" + b.getNumber() + "/api/json", user , pass);
-				BuildWithDetails bwd = gson.fromJson(ri.getDataFromServer(""), BuildWithDetails.class);
+				BuildWithDetails bwd = null;
+				try {
+					URIBuilder uriBuilder = new URIBuilder(serverURI);
+					uriBuilder.setPath("/job/" + jwd.getName() + "/" + b.getNumber() + "/api/json");
+					RESTInvoker ri = new RESTInvoker(uriBuilder.build().toString(), user, pass);
+					bwd = gson.fromJson(ri.getDataFromServer(""), BuildWithDetails.class);
+				} catch (URISyntaxException e) {
+					throw new RuntimeException("Error building URI at getBuildSourceRecordsPreemptive from JenkinsSourceTask from jenkins.", e);
+				}
 				
 				Date tsdate = new Date(bwd.timestamp);
 				String timestampISO = df.format( tsdate );

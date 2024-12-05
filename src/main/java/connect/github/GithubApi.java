@@ -9,9 +9,12 @@ import model.github.commit.CommitStats;
 import rest.RESTInvoker;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
+
+import org.apache.http.client.utils.URIBuilder;
 
 public class GithubApi {
 
@@ -36,12 +39,26 @@ public class GithubApi {
 	private static Gson gson = new Gson();
 
 	public static GithubIssues getIssues(String url, String secret, String updatedSince, State state, int offset) throws RuntimeException{
-
+		
 		String api = "/issues";
-		String apiparams = "?since="+ updatedSince +"&state=" + state.getValue() + "&order_by=updated_at&sort=desc&per_page=100&page=" + offset;
-		String urlCall = url + api + apiparams;
-		RESTInvoker ri = new RESTInvoker(urlCall, secret);
-		String json = ri.getDataFromServer("");
+		String json = null;
+		try {
+			URIBuilder builder = new URIBuilder(url + api);
+			builder.addParameter("since", updatedSince);
+			builder.addParameter("state", state.getValue());
+			builder.addParameter("order_by", "updated_at");
+			builder.addParameter("sort", "desc");
+			builder.addParameter("per_page", "100");
+			builder.addParameter("page", Integer.toString(offset));
+			api = builder.build().toString();
+			String urlCall = builder.build().toString();
+			RESTInvoker ri = new RESTInvoker(urlCall, secret);
+			json = ri.getDataFromServer("");
+
+		} catch (URISyntaxException e) {
+            throw new RuntimeException("Error building URI at getIssues from GithubApi from github.", e);
+        }
+		
 		model.github.Issue[] iss = gson.fromJson(json, model.github.Issue[].class);
 
 		GithubIssues giss = new GithubIssues();
@@ -55,14 +72,23 @@ public class GithubApi {
 	public static GitHubBranches getBranches(String url, String secret, int offset) throws RuntimeException {
 
 		String api = "/branches";
-		String apiparams = "?per_page=100" + "&page=" + offset;
-		String urlCall = url + api + apiparams;
-		RESTInvoker ri = new RESTInvoker(urlCall, secret);
-		String json = ri.getDataFromServer("");
+		String json = null;
+		try {
+			URIBuilder builder = new URIBuilder(url + api);
+			builder.addParameter("per_page", "100");
+			builder.addParameter("page", Integer.toString(offset));
+			String urlCall = builder.build().toString();
+			RESTInvoker ri = new RESTInvoker(urlCall, secret);
+			json = ri.getDataFromServer("");
+
+		} catch (URISyntaxException e) {
+			throw new RuntimeException("Error building URI at getBranches from GithubApi from github.", e);
+		}
+
 		Branch[] con = gson.fromJson(json, Branch[].class);
 
 		GitHubBranches gbr = new GitHubBranches();
-		gbr.branches=con;
+		gbr.branches = con;
 		gbr.total_count = (long) con.length;
 		gbr.offset = (long) offset;
 		return gbr;
@@ -73,8 +99,10 @@ public class GithubApi {
 
 		try {
 			String api = "/collaborators";
-			String apiparams = "?per_page=100" + "&page=" + offset;
-			String urlCall = url + api + apiparams;
+			URIBuilder builder = new URIBuilder(url + api);
+			builder.addParameter("per_page", "100");
+			builder.addParameter("page", Integer.toString(offset));
+			String urlCall = builder.build().toString();
 			RESTInvoker ri = new RESTInvoker(urlCall, secret);
 			String json = ri.getDataFromServer("");
 			User[] coll = gson.fromJson(json, User[].class);
@@ -85,7 +113,9 @@ public class GithubApi {
 			gcoll.offset = (long) offset;
 			return gcoll;
 
-		}catch (RuntimeException e){
+		} catch (URISyntaxException e) {
+			throw new RuntimeException("Error building URI at getCollaborators from GithubApi from github.", e);
+		} catch (RuntimeException e) {
 
 			if(e.getMessage().equals(RESTInvoker.HTTP_STATUS_FORBIDDEN)) {
 				throw new RuntimeException(e);
@@ -106,14 +136,21 @@ public class GithubApi {
 	public static GithubLabels getLabels(String url, String secret, int offset) throws RuntimeException {
 
 		String api = "/labels";
-		String apiparams = "?page=" + offset;
-		String urlCall = url + api + apiparams;
-		RESTInvoker ri = new RESTInvoker(urlCall, secret);
-		String json = ri.getDataFromServer("");
+		String json = null;
+		try {
+			URIBuilder builder = new URIBuilder(url + api);
+			builder.addParameter("page", Integer.toString(offset));
+			String urlCall = builder.build().toString();
+			RESTInvoker ri = new RESTInvoker(urlCall, secret);
+			json = ri.getDataFromServer("");
+		} catch (URISyntaxException e) {
+			throw new RuntimeException("Error building URI at getLabels from GithubApi from github.", e);
+		}
+
 		model.github.Label[] la = gson.fromJson(json, model.github.Label[].class);
 
 		GithubLabels gla = new GithubLabels();
-		gla.labels=la;
+		gla.labels = la;
 		gla.total_count = (long) la.length;
 		gla.offset = (long) offset;
 		return gla;
@@ -130,14 +167,22 @@ public class GithubApi {
 	public static GithubMilestones getMilestones(String url, String secret, State state, int offset) throws RuntimeException {
 
 		String api = "/milestones";
-		String apiparams = "?state=all&sort=desc&page=" + offset + "&state=" + state.getValue();
-		String urlCall = url + api + apiparams;
-		RESTInvoker ri = new RESTInvoker(urlCall, secret);
-		String json = ri.getDataFromServer("");
+		String json = null;
+		try {
+			URIBuilder builder = new URIBuilder(url + api);
+			builder.addParameter("state", state.getValue());
+			builder.addParameter("sort", "desc");
+			builder.addParameter("page", Integer.toString(offset));
+			String urlCall = builder.build().toString();
+			RESTInvoker ri = new RESTInvoker(urlCall, secret);
+			json = ri.getDataFromServer("");
+		} catch (URISyntaxException e) {
+			throw new RuntimeException("Error building URI at getMilestones from GithubApi from github.", e);
+		}
 		model.github.Milestone[] mile = gson.fromJson(json, model.github.Milestone[].class);
 
 		GithubMilestones gmile = new GithubMilestones();
-		gmile.milestones=mile;
+		gmile.milestones = mile;
 		gmile.total_count = (long) mile.length;
 		gmile.offset = (long) offset;
 		return gmile;
@@ -146,9 +191,11 @@ public class GithubApi {
 	// Returns all commits made by a user
 	public static GitHubCommits getCommits(String url, String secret, String branch, int offset) throws RuntimeException {
 		try {
-			String api = "/commits";
-			String apiparams = "?sha=" + branch + "&per_page=100&page=" + offset;
-			String urlCall = url + api + apiparams;
+			URIBuilder builder = new URIBuilder(url + "/commits");
+			builder.addParameter("sha", branch);
+			builder.addParameter("per_page", "100");
+			builder.addParameter("page", String.valueOf(offset));
+			String urlCall = builder.build().toString();
 			RESTInvoker ri = new RESTInvoker(urlCall, secret);
 			String json = ri.getDataFromServer("");
 			Commit[] commits = gson.fromJson(json, Commit[].class);
@@ -159,8 +206,9 @@ public class GithubApi {
 			gcommit.offset = (long) offset;
 			return gcommit;
 
-		}catch (RuntimeException e) {
-
+		} catch (URISyntaxException e) {
+			throw new RuntimeException("Error building URI at getCommits from GithubApi from github.", e);
+		} catch (RuntimeException e) {
 			if(e.getMessage().equals(RESTInvoker.HTTP_STATUS_FORBIDDEN)) {
 				throw new RuntimeException(e);
 			}
@@ -177,22 +225,30 @@ public class GithubApi {
 	}
 
 	public static CommitStats getCommitInfo(String url, String secret, String commitSha) throws RuntimeException {
-		String api = "/commits";
-		String apiparams = "/" + commitSha;
-		String urlCall = url + api + apiparams;
+		String json = null;
+		try {
+			URIBuilder builder = new URIBuilder(url + "/commits/" + commitSha);
+			String urlCall = builder.build().toString();
 
-		//System.out.println(urlCall);
-
-		RESTInvoker ri = new RESTInvoker(urlCall, secret);
-		String json = ri.getDataFromServer("");
+			RESTInvoker ri = new RESTInvoker(urlCall, secret);
+			json = ri.getDataFromServer("");
+		} catch (URISyntaxException e) {
+			throw new RuntimeException("Error building URI at getCommitInfo from GithubApi from github.", e);
+		}
 		return gson.fromJson(json, CommitStats.class);
 	}
 
 	public static Repository[] getReposFromOrganization(String orgName, String secret) {
-		String api = "https://api.github.com/orgs/";
-		String urlCall = api + orgName + "/repos";
-		RESTInvoker ri = new RESTInvoker(urlCall, secret);
-		String json = ri.getDataFromServer("");
+		String api = "https://api.github.com/orgs/" + orgName + "/repos";
+		String json = null;
+		try {
+			URIBuilder builder = new URIBuilder(api);
+			String urlCall = builder.build().toString();
+			RESTInvoker ri = new RESTInvoker(urlCall, secret);
+			json = ri.getDataFromServer("");
+		} catch (URISyntaxException e) {
+			throw new RuntimeException("Error building URI at getReposFromOrganization from GithubApi from github.", e);
+		}
 		return gson.fromJson(json, Repository[].class);
 	}
 

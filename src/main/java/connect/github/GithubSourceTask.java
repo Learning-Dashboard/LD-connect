@@ -265,7 +265,7 @@ public class GithubSourceTask extends SourceTask {
 					c.stats = GithubApi.getCommitInfo(url, githubSecret, c.sha).stats;
 				}
 
-				log.info("COMMITS: Commit stats for repo" + url + "successfully obtained");
+				log.info("COMMITS: Commit stats for repo " + url + " successfully obtained");
 
 				if (firstPoll.get(currentTaskID) && commitsSet.size() != 0) commitsSet = removeLargestOldCommit(commitsSet);
 				else if (firstPollInRepo.get(currentTaskID).get(url) && commitsSet.size() != 0) commitsSet = removeLargestOldCommit(commitsSet);
