@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.fhg.iese</groupId>
 	<artifactId>qrapids-connect-github</artifactId>
-	<version>3.2</version>
+	<version>3.3</version>
 	<name>Q-Rapids Kafka connectors</name>
 	<description>Connector for Github</description>
 

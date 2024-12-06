@@ -10,8 +10,8 @@ public class GlobalLimiter {
     private final RateLimiter rateLimiter;
 
     private GlobalLimiter() {
-        semaphore = new Semaphore(100); // Max 100 requests at the same time.
-        rateLimiter = RateLimiter.create(100.0); // Max 100 requests per second.
+        semaphore = new Semaphore(25); // Max 25 requests at the same time.
+        rateLimiter = RateLimiter.create(25.0); // Max 25 requests per second.
     }
 
     public static GlobalLimiter getInstance() {
