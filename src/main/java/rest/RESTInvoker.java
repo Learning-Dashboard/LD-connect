@@ -48,11 +48,12 @@ public class RESTInvoker {
 
     public String getDataFromServer(String path) {
         StringBuilder sb = new StringBuilder();
+        HttpURLConnection urlConnection = null; 
         try {
             GlobalLimiter.getInstance().acquire();
             try {
                 URL url = new URL(baseUrl + path);
-                URLConnection urlConnection = setUsernamePassword(url);
+                urlConnection = (HttpURLConnection) setUsernamePassword(url);
                 urlConnection.setRequestProperty("x-disable-pagination","True");
 
                 if(refresh != null) {
@@ -77,6 +78,11 @@ public class RESTInvoker {
             } finally {
 
                 GlobalLimiter.getInstance().release();
+
+                // Asegurarse de desconectar
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -85,11 +91,12 @@ public class RESTInvoker {
 
     public String restlogin(String burl, String name, String password)  {
         StringBuilder sb = new StringBuilder();
+        HttpURLConnection h = null;
         try {
             GlobalLimiter.getInstance().acquire();
             try {
                 URL url = new URL(burl);
-                HttpURLConnection h = (HttpURLConnection) url.openConnection();
+                h = (HttpURLConnection) url.openConnection();
                 h.setRequestMethod("POST");
                 h.setRequestProperty("Content-Type", "application/json");
                 h.setDoOutput(true);
@@ -110,6 +117,10 @@ public class RESTInvoker {
                 return sb.toString();
             } finally {
                 GlobalLimiter.getInstance().release();
+
+                if(h != null) {
+                    h.disconnect();
+                }
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
