@@ -44,13 +44,14 @@ public class RESTInvoker {
     public String getDataFromServer(String path) {
         StringBuilder sb = new StringBuilder();
         int code = 0;
+        HttpURLConnection urlConnection = null; 
         try {
             // Adquirir permiso del GlobalLimiter
             GlobalLimiter.getInstance().acquire();
             try {
                 URL url = new URL(baseUrl + path);
 
-                HttpURLConnection urlConnection = (HttpURLConnection) setUsernamePassword(url);
+                urlConnection = (HttpURLConnection) setUsernamePassword(url);
                 
                 if(secret != null){
                     urlConnection.setRequestProperty("Authorization","Bearer " + secret);
@@ -69,6 +70,11 @@ public class RESTInvoker {
             } finally {
                 // Liberar permiso del GlobalLimiter
                 GlobalLimiter.getInstance().release();
+
+                // Asegurarse de desconectar
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
             }
         } catch (Exception e) {
             if(code == 403) throw new RuntimeException(HTTP_STATUS_FORBIDDEN, e);
