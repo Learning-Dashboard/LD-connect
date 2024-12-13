@@ -38,6 +38,14 @@ public class GithubApi {
 
 	private static Gson gson = new Gson();
 
+	private static void sleeptime() {
+        try {
+            Thread.sleep(30);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
 	public static GithubIssues getIssues(String url, String secret, String updatedSince, State state, int offset) throws RuntimeException{
 		
 		String api = "/issues";
@@ -65,6 +73,7 @@ public class GithubApi {
 		giss.issues=iss;
 		giss.total_count = (long) iss.length;
 		giss.offset = (long) offset;
+		sleeptime();
 		return giss;
 	}
 
@@ -91,6 +100,7 @@ public class GithubApi {
 		gbr.branches = con;
 		gbr.total_count = (long) con.length;
 		gbr.offset = (long) offset;
+		sleeptime();
 		return gbr;
 	}
 
@@ -111,6 +121,7 @@ public class GithubApi {
 			gcoll.users = coll;
 			gcoll.total_count = (long) coll.length;
 			gcoll.offset = (long) offset;
+			sleeptime();
 			return gcoll;
 
 		} catch (URISyntaxException e) {
@@ -128,6 +139,7 @@ public class GithubApi {
 			gcoll.users = new User[]{};
 			gcoll.total_count = (long) 0;
 			gcoll.offset = (long) offset;
+			sleeptime();
 			return gcoll;
 		}
 	}
@@ -153,6 +165,7 @@ public class GithubApi {
 		gla.labels = la;
 		gla.total_count = (long) la.length;
 		gla.offset = (long) offset;
+		sleeptime();
 		return gla;
 	}
 
@@ -160,6 +173,7 @@ public class GithubApi {
 	public static Repository getRepository(String url, String secret) throws RuntimeException{
 		RESTInvoker ri = new RESTInvoker(url, secret);
 		String json = ri.getDataFromServer("");
+		sleeptime();
 		return gson.fromJson(json, Repository.class);
 	}
 
@@ -185,6 +199,7 @@ public class GithubApi {
 		gmile.milestones = mile;
 		gmile.total_count = (long) mile.length;
 		gmile.offset = (long) offset;
+		sleeptime();
 		return gmile;
 	}
 
@@ -204,6 +219,7 @@ public class GithubApi {
 			gcommit.commits = commits;
 			gcommit.total_count = (long) commits.length;
 			gcommit.offset = (long) offset;
+			sleeptime();
 			return gcommit;
 
 		} catch (URISyntaxException e) {
@@ -220,6 +236,7 @@ public class GithubApi {
 			gcommit.commits = new Commit[]{};
 			gcommit.total_count = (long) 0;
 			gcommit.offset = (long) offset;
+			sleeptime();
 			return gcommit;
 		}
 	}
@@ -235,6 +252,7 @@ public class GithubApi {
 		} catch (URISyntaxException e) {
 			throw new RuntimeException("Error building URI at getCommitInfo from GithubApi from github.", e);
 		}
+		sleeptime();
 		return gson.fromJson(json, CommitStats.class);
 	}
 
@@ -249,6 +267,7 @@ public class GithubApi {
 		} catch (URISyntaxException e) {
 			throw new RuntimeException("Error building URI at getReposFromOrganization from GithubApi from github.", e);
 		}
+		sleeptime();
 		return gson.fromJson(json, Repository[].class);
 	}
 
