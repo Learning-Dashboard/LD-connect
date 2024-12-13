@@ -24,9 +24,9 @@ public class TaigaApi {
     public TaigaApi() {
     }
 
-    private static void sleep10ms() {
+    private static void sleeptime() {
         try {
-            Thread.sleep(10);
+            Thread.sleep(30);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
@@ -36,7 +36,7 @@ public class TaigaApi {
         RESTInvoker ri = new RESTInvoker(url + "/issues?project=" + projectId, token);
         String json = ri.getDataFromServer("");
         model.taiga.Issue[] iss = gson.fromJson(json, model.taiga.Issue[].class);
-        sleep10ms();
+        sleeptime();
         return iss;
     }
 
@@ -44,7 +44,7 @@ public class TaigaApi {
         RESTInvoker ri = new RESTInvoker(url + "/userstories?project=" + projectId, token);
         String json = ri.getDataFromServer("");
         model.taiga.UserStory[] us = gson.fromJson(json, model.taiga.UserStory[].class);
-        sleep10ms();
+        sleeptime();
         return us;
     }
 
@@ -52,7 +52,7 @@ public class TaigaApi {
         RESTInvoker ri = new RESTInvoker(url + "/userstories/" + Id, token);
         String json = ri.getDataFromServer("");
         model.taiga.UserStory us = gson.fromJson(json, model.taiga.UserStory.class);
-        sleep10ms();
+        sleeptime();
         return us;
     }
 
@@ -64,7 +64,7 @@ public class TaigaApi {
         for (int i = 0; i < mil.length; ++i) {
             m.put(mil[i].id, mil[i]);
         }
-        sleep10ms();
+        sleeptime();
         return m;
     }
 
@@ -72,7 +72,7 @@ public class TaigaApi {
         RESTInvoker ri = new RESTInvoker(url + "/tasks?project=" + projectId, token);
         String json = ri.getDataFromServer("");
         model.taiga.Task[] task = gson.fromJson(json, model.taiga.Task[].class);
-        sleep10ms();
+        sleeptime();
         return task;
     }
 
@@ -80,7 +80,7 @@ public class TaigaApi {
         RESTInvoker ri = new RESTInvoker(url + "/epics?project=" + projectId, token);
         String json = ri.getDataFromServer("");
         model.taiga.Epic[] ep = gson.fromJson(json, model.taiga.Epic[].class);
-        sleep10ms();
+        sleeptime();
         return ep;
     }
 
@@ -88,7 +88,7 @@ public class TaigaApi {
         RESTInvoker ri = new RESTInvoker(url + "/projects/by_slug?slug=" + slug, token);
         String json = ri.getDataFromServer("");
         model.taiga.Project pr = gson.fromJson(json, model.taiga.Project.class);
-        sleep10ms();
+        sleeptime();
         return pr.id;
     }
 
@@ -102,7 +102,7 @@ public class TaigaApi {
         pr.closed_points = pr2.closed_points;
         pr.defined_points = pr2.defined_points;
         pr.total_points = pr2.total_points;
-        sleep10ms();
+        sleeptime();
         return pr;
     }
 
@@ -110,7 +110,7 @@ public class TaigaApi {
         RESTInvoker ri = new RESTInvoker(url + "/auth", name, password);
         String json = ri.restlogin(url + "/auth", name, password);
         model.taiga.User u = gson.fromJson(json, model.taiga.User.class);
-        sleep10ms();
+        sleeptime();
         return u.auth_token;
     }
 
@@ -136,7 +136,7 @@ public class TaigaApi {
                 WantedIDs.put(attributes[i].id, attributes[i].name.toUpperCase());
             }
         }
-        sleep10ms();
+        sleeptime();
         return WantedIDs;
     }
 
@@ -157,7 +157,7 @@ public class TaigaApi {
                 temp.put(v, values.attributes_values.get(k.toString()));
             });
         }
-        sleep10ms();
+        sleeptime();
         return temp;
     }
 
