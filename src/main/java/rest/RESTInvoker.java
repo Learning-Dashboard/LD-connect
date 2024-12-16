@@ -65,7 +65,9 @@ public class RESTInvoker {
                     sb.append(line);
                 }
                 reader.close();
-     
+
+                Thread.sleep(30);
+                
                 return sb.toString();
             } finally {
                 // Liberar permiso del GlobalLimiter
