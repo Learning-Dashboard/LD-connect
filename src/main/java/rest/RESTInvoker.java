@@ -74,6 +74,7 @@ public class RESTInvoker {
                 }
                 reader.close();
 
+                Thread.sleep(30);
                 return sb.toString();
             } finally {
 
