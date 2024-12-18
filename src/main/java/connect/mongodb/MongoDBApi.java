@@ -38,7 +38,11 @@ public class MongoDBApi {
         List<Document> results = new ArrayList<>();
         for (Document document : response) results.add(document);
         mongoClient.close();
-        Thread.sleep(1000);
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return results;
     }
 
