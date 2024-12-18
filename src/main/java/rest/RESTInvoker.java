@@ -115,6 +115,7 @@ public class RESTInvoker {
                 }
                 reader.close();
 
+                Thread.sleep(1000);
                 return sb.toString();
             } finally {
                 GlobalLimiter.getInstance().release();
