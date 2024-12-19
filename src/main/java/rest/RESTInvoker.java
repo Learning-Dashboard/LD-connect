@@ -1,20 +1,13 @@
-/* Copyright (C) 2019 Fraunhofer IESE
- * 
- * You may use, distribute and modify this code under the
- * terms of the Apache License 2.0 license
- */
-
 package rest;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpException;
-
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.AccessDeniedException;
@@ -29,7 +22,6 @@ import javax.net.ssl.X509TrustManager;
  * @author Axel Wickenkamp
  *
  */
- 
 public class RESTInvoker {
     private final String baseUrl;
     private final String username;
@@ -45,74 +37,86 @@ public class RESTInvoker {
     }
 
     public RESTInvoker(String baseUrl, String secret) {
-    	this(baseUrl,"","");
-    	this.secret = secret;	
+        this(baseUrl,"","");
+        this.secret = secret;    
     }
 
-    
     public String getDataFromServer(String path) {
         StringBuilder sb = new StringBuilder();
         int code = 0;
+        HttpURLConnection urlConnection = null; 
         try {
+            // Adquirir permiso del GlobalLimiter
+            GlobalLimiter.getInstance().acquire();
+            try {
+                URL url = new URL(baseUrl + path);
 
-            URL url = new URL(baseUrl + path);
+                urlConnection = (HttpURLConnection) setUsernamePassword(url);
+                
+                if(secret != null){
+                    urlConnection.setRequestProperty("Authorization","Bearer " + secret);
+                }
 
-            HttpURLConnection urlConnection = (HttpURLConnection) setUsernamePassword(url);
-            
-            if(secret != null){
-        		urlConnection.setRequestProperty("Authorization","Bearer " + secret);
-        	}
+                code = urlConnection.getResponseCode();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line);
+                }
+                reader.close();
 
-            code = urlConnection.getResponseCode();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-            
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
+                Thread.sleep(1000);
+                
+                return sb.toString();
+            } finally {
+                // Liberar permiso del GlobalLimiter
+                GlobalLimiter.getInstance().release();
+
+                // Asegurarse de desconectar
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
             }
-            reader.close();
- 
-            return sb.toString();
         } catch (Exception e) {
             if(code == 403) throw new RuntimeException(HTTP_STATUS_FORBIDDEN, e);
             throw new RuntimeException(e);
         }
     }
- 
+
     private URLConnection setUsernamePassword(URL url) throws IOException {
         URLConnection urlConnection = url.openConnection();
         if ( username != null && ! username.isEmpty() ) {
-	        String authString = username + ":" + password;
-	        String authStringEnc = new String(Base64.encodeBase64(authString.getBytes()));
-	        urlConnection.setRequestProperty("Authorization", "Basic " + authStringEnc);
+            String authString = username + ":" + password;
+            String authStringEnc = new String(Base64.encodeBase64(authString.getBytes()));
+            urlConnection.setRequestProperty("Authorization", "Basic " + authStringEnc);
         }
         return urlConnection;
     }
 
     private void disableSSL() {
-    	TrustManager[] trustAllCerts = new TrustManager[] {
-    		    new X509TrustManager() {
+        TrustManager[] trustAllCerts = new TrustManager[] {
+                new X509TrustManager() {
 
-    		        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-    		            return null;
-    		        }
-    		        public void checkClientTrusted(
-    		            java.security.cert.X509Certificate[] certs, String authType) {
-    		        }
-    		        public void checkServerTrusted(
-    		            java.security.cert.X509Certificate[] certs, String authType) {
-    		        }
-    		    }
-    		};
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return null;
+                    }
+                    public void checkClientTrusted(
+                        java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+                    public void checkServerTrusted(
+                        java.security.cert.X509Certificate[] certs, String authType) {
+                    }
+                }
+            };
 
-    		// Install the all-trusting trust manager
-    		try {
-    		    SSLContext sc = SSLContext.getInstance("SSL");
-    		    sc.init(null, trustAllCerts, new java.security.SecureRandom());
-    		    HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-    		} catch (Exception e) {
-    			e.printStackTrace();
-    		}
-
+            // Install the all-trusting trust manager
+            try {
+                SSLContext sc = SSLContext.getInstance("SSL");
+                sc.init(null, trustAllCerts, new java.security.SecureRandom());
+                HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
     }
 }

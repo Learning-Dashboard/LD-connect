@@ -65,6 +65,7 @@ public class GithubApi {
 		giss.issues=iss;
 		giss.total_count = (long) iss.length;
 		giss.offset = (long) offset;
+		
 		return giss;
 	}
 
@@ -91,6 +92,7 @@ public class GithubApi {
 		gbr.branches = con;
 		gbr.total_count = (long) con.length;
 		gbr.offset = (long) offset;
+		
 		return gbr;
 	}
 
@@ -111,6 +113,7 @@ public class GithubApi {
 			gcoll.users = coll;
 			gcoll.total_count = (long) coll.length;
 			gcoll.offset = (long) offset;
+			
 			return gcoll;
 
 		} catch (URISyntaxException e) {
@@ -128,6 +131,7 @@ public class GithubApi {
 			gcoll.users = new User[]{};
 			gcoll.total_count = (long) 0;
 			gcoll.offset = (long) offset;
+			
 			return gcoll;
 		}
 	}
@@ -153,6 +157,7 @@ public class GithubApi {
 		gla.labels = la;
 		gla.total_count = (long) la.length;
 		gla.offset = (long) offset;
+		
 		return gla;
 	}
 
@@ -160,6 +165,7 @@ public class GithubApi {
 	public static Repository getRepository(String url, String secret) throws RuntimeException{
 		RESTInvoker ri = new RESTInvoker(url, secret);
 		String json = ri.getDataFromServer("");
+		
 		return gson.fromJson(json, Repository.class);
 	}
 
@@ -185,6 +191,7 @@ public class GithubApi {
 		gmile.milestones = mile;
 		gmile.total_count = (long) mile.length;
 		gmile.offset = (long) offset;
+		
 		return gmile;
 	}
 
@@ -204,6 +211,7 @@ public class GithubApi {
 			gcommit.commits = commits;
 			gcommit.total_count = (long) commits.length;
 			gcommit.offset = (long) offset;
+			
 			return gcommit;
 
 		} catch (URISyntaxException e) {
@@ -220,6 +228,7 @@ public class GithubApi {
 			gcommit.commits = new Commit[]{};
 			gcommit.total_count = (long) 0;
 			gcommit.offset = (long) offset;
+			
 			return gcommit;
 		}
 	}
@@ -235,6 +244,7 @@ public class GithubApi {
 		} catch (URISyntaxException e) {
 			throw new RuntimeException("Error building URI at getCommitInfo from GithubApi from github.", e);
 		}
+		
 		return gson.fromJson(json, CommitStats.class);
 	}
 
@@ -249,6 +259,7 @@ public class GithubApi {
 		} catch (URISyntaxException e) {
 			throw new RuntimeException("Error building URI at getReposFromOrganization from GithubApi from github.", e);
 		}
+		
 		return gson.fromJson(json, Repository[].class);
 	}
 
