@@ -25,7 +25,7 @@ import javax.net.ssl.X509TrustManager;
  */
 public class RESTInvoker {
 
-    private static final int MAX_CONCURRENT_CALLS = 150;
+    private static final int MAX_CONCURRENT_CALLS = 80;
     private static final Semaphore concurrentCalls = new Semaphore(MAX_CONCURRENT_CALLS);
 
     private final String baseUrl;
