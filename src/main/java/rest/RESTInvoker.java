@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.concurrent.Semaphore;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -22,6 +23,10 @@ import javax.net.ssl.X509TrustManager;
  */
 
 public class RESTInvoker {
+
+    private static final int MAX_CONCURRENT_CALLS = 80;
+    private static final Semaphore concurrentCalls = new Semaphore(MAX_CONCURRENT_CALLS);
+
     private final String baseUrl;
     private final String username;
     private final String password;
@@ -47,86 +52,92 @@ public class RESTInvoker {
 
 
     public String getDataFromServer(String path) {
+
+        // Adquirir un permiso. Si no hay permisos disponibles, el hilo se bloquea
+        // hasta que alguno de los 80 hilos libere el permiso.
+        try {
+            concurrentCalls.acquire();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("El hilo fue interrumpido al intentar adquirir el semáforo", e);
+        }
+
         StringBuilder sb = new StringBuilder();
         HttpURLConnection urlConnection = null; 
+    
         try {
-            GlobalLimiter.getInstance().acquire();
-            try {
-                URL url = new URL(baseUrl + path);
-                urlConnection = (HttpURLConnection) setUsernamePassword(url);
-                urlConnection.setRequestProperty("x-disable-pagination","True");
+            URL url = new URL(baseUrl + path);
+            urlConnection = (HttpURLConnection) setUsernamePassword(url);
+            urlConnection.setRequestProperty("x-disable-pagination","True");
 
-                if(refresh != null) {
+            if(refresh != null) {
 
-                }
-
-                if(secret != null){
-                    //old -> urlConnection.setRequestProperty("PRIVATE-TOKEN",secret);
-                    //changed for taiga connection
-                    urlConnection.setRequestProperty("Authorization", "Bearer " + secret);
-                }
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-                reader.close();
-
-                Thread.sleep(1000);
-                return sb.toString();
-            } finally {
-
-                GlobalLimiter.getInstance().release();
-
-                // Asegurarse de desconectar
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
             }
+
+            if(secret != null){
+                //old -> urlConnection.setRequestProperty("PRIVATE-TOKEN",secret);
+                //changed for taiga connection
+                urlConnection.setRequestProperty("Authorization", "Bearer " + secret);
+            }
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+            reader.close();
+
+            return sb.toString();
         } catch (Exception e) {
             throw new RuntimeException(e);
+
+        } finally {
+            // Asegurarse de desconectar
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
+
+            // Liberar el permiso al terminar la llamada (éxito o error).
+            concurrentCalls.release();
         }
+        
     }
 
     public String restlogin(String burl, String name, String password)  {
         StringBuilder sb = new StringBuilder();
         HttpURLConnection h = null;
+
         try {
-            GlobalLimiter.getInstance().acquire();
-            try {
-                URL url = new URL(burl);
-                h = (HttpURLConnection) url.openConnection();
-                h.setRequestMethod("POST");
-                h.setRequestProperty("Content-Type", "application/json");
-                h.setDoOutput(true);
-                String json = "{\r\n    \"password\" : \""+password+"\",\r\n    \"type\" : \"normal\",\r\n    \"username\" : \""+name+"\"\r\n}";
-                byte[] input = json.getBytes();
-                OutputStream oc = h.getOutputStream();
-                oc.write(input);
-                h.connect();
+            URL url = new URL(burl);
+            h = (HttpURLConnection) url.openConnection();
+            h.setRequestMethod("POST");
+            h.setRequestProperty("Content-Type", "application/json");
+            h.setDoOutput(true);
+            String json = "{\r\n    \"password\" : \""+password+"\",\r\n    \"type\" : \"normal\",\r\n    \"username\" : \""+name+"\"\r\n}";
+            byte[] input = json.getBytes();
+            OutputStream oc = h.getOutputStream();
+            oc.write(input);
+            h.connect();
 
-                BufferedReader reader = new BufferedReader(new InputStreamReader(h.getInputStream()));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(h.getInputStream()));
 
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-                reader.close();
-
-                Thread.sleep(1000);
-                return sb.toString();
-            } finally {
-                GlobalLimiter.getInstance().release();
-
-                if(h != null) {
-                    h.disconnect();
-                }
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
             }
+            reader.close();
+
+            return sb.toString();
+
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            if(h != null) {
+                h.disconnect();
+            }
         }
+        
     }
 
     private URLConnection setUsernamePassword(URL url) throws IOException {
