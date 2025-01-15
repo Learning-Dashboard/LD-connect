@@ -39,7 +39,7 @@ public class MongoDBApi {
         for (Document document : response) results.add(document);
         mongoClient.close();
         try {
-            Thread.sleep(1000);
+            Thread.sleep(100); 
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
