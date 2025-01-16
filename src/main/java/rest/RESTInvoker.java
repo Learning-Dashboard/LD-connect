@@ -11,6 +11,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.AccessDeniedException;
+import java.util.concurrent.Semaphore;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -23,6 +24,10 @@ import javax.net.ssl.X509TrustManager;
  *
  */
 public class RESTInvoker {
+
+    private static final int MAX_CONCURRENT_CALLS = 80;
+    private static final Semaphore concurrentCalls = new Semaphore(MAX_CONCURRENT_CALLS);
+
     private final String baseUrl;
     private final String username;
     private final String password;
@@ -42,45 +47,49 @@ public class RESTInvoker {
     }
 
     public String getDataFromServer(String path) {
+        // Adquirir un permiso. Si no hay permisos disponibles, el hilo se bloquea
+        // hasta que alguno de los 80 hilos libere el permiso.
+        try {
+            concurrentCalls.acquire();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("El hilo fue interrumpido al intentar adquirir el semáforo", e);
+        }
+
         StringBuilder sb = new StringBuilder();
         int code = 0;
         HttpURLConnection urlConnection = null; 
+
         try {
-            // Adquirir permiso del GlobalLimiter
-            GlobalLimiter.getInstance().acquire();
-            try {
-                URL url = new URL(baseUrl + path);
+            URL url = new URL(baseUrl + path);
 
-                urlConnection = (HttpURLConnection) setUsernamePassword(url);
-                
-                if(secret != null){
-                    urlConnection.setRequestProperty("Authorization","Bearer " + secret);
-                }
-
-                code = urlConnection.getResponseCode();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-                
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-                reader.close();
-
-                Thread.sleep(1000);
-                
-                return sb.toString();
-            } finally {
-                // Liberar permiso del GlobalLimiter
-                GlobalLimiter.getInstance().release();
-
-                // Asegurarse de desconectar
-                if (urlConnection != null) {
-                    urlConnection.disconnect();
-                }
+            urlConnection = (HttpURLConnection) setUsernamePassword(url);
+            
+            if(secret != null){
+                urlConnection.setRequestProperty("Authorization","Bearer " + secret);
             }
-        } catch (Exception e) {
+
+            code = urlConnection.getResponseCode();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+            
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+            reader.close();
+            
+            return sb.toString();
+        } 
+        catch (Exception e) {
             if(code == 403) throw new RuntimeException(HTTP_STATUS_FORBIDDEN, e);
             throw new RuntimeException(e);
+        } finally {
+            // Asegurarse de desconectar
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
+            // Liberar el permiso al terminar la llamada (éxito o error).
+            concurrentCalls.release();
         }
     }
 
